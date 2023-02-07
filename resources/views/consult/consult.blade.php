@@ -16,7 +16,7 @@
         
         Photo: 
         @if(isset($consult->photo))
-        {{ $consult->photo }} <br>
+        <img src='{{ Storage::url('images/' . $consult->photo) }}' alt='user pic'> <br>
         @else 
         no photo <br>
         @endif

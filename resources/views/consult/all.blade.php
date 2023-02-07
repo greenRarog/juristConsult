@@ -5,6 +5,12 @@
         </h2>
     </x-slot>   
     
+    <div class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        @if($user->role == 'client')
+            <a href='/createConsult'>создать новое обращение</a><hr>
+        @endif
+    </div>
+    
     <table class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
         <tr>
             <th>category</th>
@@ -26,9 +32,9 @@
             <td>{{ $consult->desсription }}</td>
             <td>
             @if (isset($consult->photo))    
-                {{ $consult->photo }}
+              есть фото
             @else
-            no photo
+              no photo
             @endif
             </td>            
             <td>{{ $consult->author->name }}</td>            

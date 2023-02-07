@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Models\Consult;
 
 class ProfileController extends Controller
 {
@@ -16,8 +17,16 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $consults = null;
+        if ($request->user()->role == 'client') {
+            $consults = Consult::where('author_id', $request->user()->id)->get();
+        }
+        if ($request->user()->role == 'jurist') {
+            $consults = Consult::where('jurist_id', $request->user()->id)->get();                        
+        }                
         return view('profile.edit', [
             'user' => $request->user(),
+            'consults' => $consults,
         ]);
     }
 

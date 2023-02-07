@@ -6,24 +6,55 @@ use App\Models\Consult;
 use App\Models\Comment;
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ConsultController extends Controller
 {
     public function all(){
-        $consults = Consult::all();
-        
+        $user = Auth::User();      
+        if ($user->role === 'jurist') {
+            $consults = Consult::where('status', 'open')->
+                                 orWhere('jurist_id', $user->id)
+                                 ->get();
+        } else {
+            $consults = Consult::all();            
+        }        
         return view ('consult.all', [
+            'user' => $user,
             'consults' => $consults,
         ]);
     }    
         
-    public function create(){
+    public function create(Request $request){
+        if ($request->has('title') &&
+            $request->has('description') &&
+            $request->has('category') && 
+            $request->has('author_id')){
+                $consult = new Consult;                
+                $consult->title = $request->title;
+                $consult->desсription = $request->description;
+                $consult->category_id = $request->category;
+                $consult->status = 'open';
+                $consult->author_id = $request->author_id;
+                $consult->jurist_id = null;                
+                if (isset($request->photo)) {
+                    $picName = $request->photo->getClientOriginalName();
+                    $request->photo->move(Storage::path('/public/images'), $picName);                    
+                    $consult->photo = $picName;
+                } else {
+                    $consult->photo = null;
+                }
+                $consult->save();                
+            return redirect('/consult/' . $consult->id);
+            
+        } else {                
         $user = Auth::User();
-        $categories = Category::all();
+        $categories = Category::all();                   
         return view('consult.create', [
             'user' => $user,
             'categories' => $categories,
         ]);
+        }
     }
     public function consult(Request $request, $consult_id){
         if ($request->has('comment_author') &&
@@ -35,9 +66,10 @@ class ConsultController extends Controller
                 $request->has('user_id') &&
                 $request->has('consult_id')) {            
             $this->inWorkConsult($request);            
-        }                
+        }                     
         $consult = Consult::find($consult_id);        
         $user = Auth::User();        
+        
         //dd($user);                        
         return view ('consult.consult', [
             'consult' => $consult,
